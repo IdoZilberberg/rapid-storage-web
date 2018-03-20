@@ -42,7 +42,8 @@
         <div class="col-md-4 text-right">
           <a *ngIf="!file.deletionDate" [href]="file.downloadURL">Download</a>
           <!--<button class="btn btn-success" (click)="onDownloadFile(file)">Download</button>-->
-          <button [disabled]="file.deletionDate" class="btn btn-danger" (click)="onDeleteFile(file)">{{file.deletionDate ? 'Deleted' : 'Delete'}}</button>
+          <button *ngIf="!file.deletionDate" class="btn btn-danger" (click)="onDeleteFile(file)">Delete</button>
+          <button *ngIf="file.deletionDate" class="btn btn-info" (click)="onUndeleteFile(file)">Undelete</button>
           <button [disabled]="file.ownerUserId !== currentUser.id" class="btn btn-info"
                   (click)="onClickTogglePublic(file)">{{file.isPublic ? 'Public' : 'Private'}}
           </button>

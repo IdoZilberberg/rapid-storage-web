@@ -71,7 +71,7 @@ export class AppComponent implements OnInit {
     // fileEntry.isPublic = !fileEntry.isPublic;
     console.log('onClickTogglePublic, now is: ', fileEntry.isPublic);
 
-    return this.files.setFilePublicFlag(fileEntry, !fileEntry.isPublic)
+    return this.files.setFileFlag(fileEntry, !fileEntry.isPublic, null)
       .then(() => {
         this.files.reloadVisibleFiles(this.currentUser)
           .then(files => {
@@ -171,4 +171,14 @@ export class AppComponent implements OnInit {
     //   );
   }
 
+  onUndeleteFile(fileEntry: FileEntry) {
+    return this.files.setFileFlag(fileEntry, fileEntry.isPublic, true)
+      .then(() => {
+        this.files.reloadVisibleFiles(this.currentUser)
+          .then(files => {
+            this.visibleFiles = files;
+          });
+
+      });
+  }
 }

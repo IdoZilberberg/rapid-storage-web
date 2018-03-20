@@ -46,8 +46,8 @@ export class FilesService {
 
   }
 
-  public setFilePublicFlag(fileEntry: FileEntry, newPublicFlag: boolean) {
-    return this.http.put(`${URLS.BASE}/${fileEntry.fileId}?public=${newPublicFlag}`, null).toPromise();
+  public setFileFlag(fileEntry: FileEntry, newPublicFlag: boolean, undeleteFlag: boolean) {
+    return this.http.put(`${URLS.BASE}/${fileEntry.fileId}?public=${newPublicFlag}&undelete=${undeleteFlag}`, null).toPromise();
   }
 
   public setFileDeleted(fileEntry: FileEntry) {
