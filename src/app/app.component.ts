@@ -1,5 +1,5 @@
 import {Component, OnChanges, OnInit, SimpleChanges} from '@angular/core';
-import File from './models/File';
+import FileEntry from './models/FileEntry';
 import User from './models/User';
 import {AuthService} from './services/auth';
 import {FilesService} from './services/files';
@@ -16,8 +16,14 @@ export class AppComponent implements OnInit {
 
   allUsers: User[] = [];
   currentUser: User = null;
+  selectedFileToUpload: File = null;
 
-  visibleFiles$: Promise<File[]> = null;
+  visibleFiles: FileEntry[] = [];
+
+  manualUserToken = '';
+  manualFileId = '';
+  manualUrlDownload = '';
+  errMessage = '';
 
   constructor(public auth: AuthService, public files: FilesService) {
   }
@@ -25,7 +31,10 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.allUsers = this.auth.getUsers();
     this.currentUser = this.auth.getCurrentUser();
-    this.visibleFiles$ = this.files.getVisibleFiles(this.currentUser);
+    this.files.reloadVisibleFiles(this.currentUser)
+      .then(files => {
+        this.visibleFiles = files;
+      });
   }
 
   // ngOnChanges(changes: SimpleChanges) {
@@ -38,45 +47,128 @@ export class AppComponent implements OnInit {
   onSelectUser(user: User) {
     this.currentUser = user;
     this.auth.setCurrentUser(user);
-    this.visibleFiles$ = this.files.getVisibleFiles(this.currentUser);
+    this.files.reloadVisibleFiles(this.currentUser)
+      .then(files => {
+        this.visibleFiles = files;
+      });
     console.log('changes: visibleFiles');
   }
 
-  onClickUploadFile() {
-    console.log('onClickUploadFile');
+
+  onDeleteFile(fileEntry: FileEntry) {
+    console.log('onDeleteFile', fileEntry.id);
+    return this.files.setFileDeleted(fileEntry)
+      .then(() => {
+        this.files.reloadVisibleFiles(this.currentUser)
+          .then(files => {
+            this.visibleFiles = files;
+          });
+      });
   }
 
-  onDeleteFile(file: File) {
-    console.log('onDeleteFile', file.id);
+
+  onClickTogglePublic(fileEntry: FileEntry) {
+    // fileEntry.isPublic = !fileEntry.isPublic;
+    console.log('onClickTogglePublic, now is: ', fileEntry.isPublic);
+
+    return this.files.setFilePublicFlag(fileEntry, !fileEntry.isPublic)
+      .then(() => {
+        this.files.reloadVisibleFiles(this.currentUser)
+          .then(files => {
+            this.visibleFiles = files;
+          });
+
+      });
+
   }
 
-
-  onClickSetPublic(file: File, isPublic: boolean) {
-    console.log('onClickSetPublic', file.id, isPublic);
-
-  }
-
-  onClickTogglePublic(file: File) {
-    file.isPublic = !file.isPublic;
-    console.log('onClickTogglePublic', file.isPublic);
-  }
-
-  onDownloadFile(file: File) {
-    console.log('onDownloadFile', file.id);
-    this.files.downloadFile(file);
-  }
+  // onDownloadFile(file: FileEntry) {
+  //   console.log('onDownloadFile', file.id);
+  //
+  //   this.files.downloadFileFromStorage(file);
+  // }
 
   onClickDownloadPrivateFile() {
-    console.log('onClickDownloadPrivateFile');
+    console.log('onClickDownloadPrivateFile', this.manualFileId);
+
+    this.files.getFileMetadata(this.manualUserToken, this.manualFileId)
+      .then((fileEntries: FileEntry[]) => {
+        fileEntries = fileEntries || [];
+        console.log(fileEntries);
+        if (fileEntries.length > 0) {
+          this.manualUrlDownload = fileEntries[0].downloadURL;
+        }
+        // return this.files.downloadFileFromStorage(fileEntry);
+      })
+      .catch(error => {
+        console.log(error);
+        this.errMessage = error.message;
+        setTimeout(() => { this.errMessage = ''; }, 3000);
+      });
+
     // Open prompt here
 
   }
 
-  getFileStyle(file: File) {
+  getFileStyle(file: FileEntry) {
     // console.log(`getFontStyle. file.owner=${file.ownerUserId} current=${this.currentUser.id}`);
     return {
       'color': file.deletionDate ? 'lightgray' : 'black',
       'font-weight': file.ownerUserId === this.currentUser.id ? 800 : 100
     };
   }
+
+  // Uses File API, see https://developer.mozilla.org/en-US/docs/Web/API/File
+  onUploadFileChange(event) {
+    if (event.target.files.length > 0) {
+      this.selectedFileToUpload = event.target.files[0];
+    }
+  }
+
+  // See http://www.angulartutorial.net/2018/01/file-upload-and-send-data-to-backend.html
+  onClickUploadFile() {
+    console.log('onClickUploadFile', this.selectedFileToUpload);
+    const fData: FormData = new FormData;
+    fData.append('file[]', this.selectedFileToUpload);
+    const newFileMetadata = <FileEntry>{
+      fileId: this.files.generatePrivateFileId(),
+      ownerUserId: this.currentUser.id,
+      path: '/',
+      name: this.selectedFileToUpload.name,
+      size: this.selectedFileToUpload.size,
+      isPublic: true,
+      modificationDate: new Date(this.selectedFileToUpload['lastModified']).toISOString(),
+      deletionDate: null
+    };
+
+    this.files.uploadFileToStorage(this.selectedFileToUpload, newFileMetadata)
+      .then(response => {
+        this.files.reloadVisibleFiles(this.currentUser)
+          .then(files => {
+            this.visibleFiles = files;
+          });
+
+      });
+    // fData.append('data', JSON.stringify(newFileMetadata));
+    // this.files.postFileMetadata(this.currentUser.token, newFileMetadata)
+    //   .subscribe(
+    //     response => {
+    //       console.log(response);
+    //     },
+    //     error => {
+    //       console.log(error);
+    //     }
+    //   );
+    // this.files.uploadFile(fData)
+    //   .subscribe(
+    //     response => {
+    //       console.log('set any success actions...');
+    //       return response;
+    //     },
+    //     error => {
+    //       console.log('set any error actions...');
+    //     }
+    //   );
+  }
+
 }

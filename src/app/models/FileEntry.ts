@@ -1,18 +1,19 @@
-export default class File {
-  id: string;
-  privateFileId: string;
+export default class FileEntry {
+  id?: string;
+  fileId?: string;
   ownerUserId: string;
   path: string;
   name: string;
   size: number;
   isPublic: boolean;
-  modificationDate: string;
-  deletionDate: string;
+  modificationDate?: string;
+  deletionDate?: string;
+  downloadURL?: string;
 
 
   constructor(id: string, privateFileId: string, ownerUserId: string, path: string, name: string, size: number, isPublic: boolean, modificationDate: string, deletionDate: string) {
     this.id = id;
-    this.privateFileId = privateFileId;
+    this.fileId = privateFileId;
     this.ownerUserId = ownerUserId;
     this.path = path;
     this.name = name;

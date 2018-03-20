@@ -5,18 +5,28 @@
   <!--<p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p>-->
   <!--</div>-->
   <div class="row">
-    <div class="col">
-      <button class="btn btn-success" (click)="onClickUploadFile()">Upload file</button>
-      <button class="btn btn-success" (click)="onClickDownloadPrivateFile()">Download private file</button>
+    <div class="col-md-4">
+      <input type="file" id="uploader" (change)="onUploadFileChange($event)" #fileInput>
+      <button [disabled]="!selectedFileToUpload" class="btn btn-success" (click)="onClickUploadFile()">Upload file</button>
     </div>
-    <div class="col">
+    <div class="col-md-4">
       <div ngbDropdown class="d-inline-block">
-        <button class="btn btn-outline-primary" id="dropdownBasic1" ngbDropdownToggle>{{currentUser.name}}</button>
+        <button class="btn btn-outline-primary" id="dropdownBasic1" ngbDropdownToggle>{{currentUser.name}} ({{currentUser.token}})</button>
         <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
-          <button *ngFor="let user of allUsers" class="dropdown-item" (click)="onSelectUser(user)">{{user.name}}
+          <button *ngFor="let user of allUsers" class="dropdown-item" (click)="onSelectUser(user)">{{user.name}} ({{user.token}})
           </button>
         </div>
       </div>
+    </div>
+    <div *ngIf="errMessage "class="col-md-4" style="color: red;">{{errMessage}}</div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col">
+      <input type="text" [(ngModel)]="manualUserToken" placeholder="Enter user token">
+      <input type="text" [(ngModel)]="manualFileId" placeholder="Enter private file token">
+      <button class="btn btn-success" (click)="onClickDownloadPrivateFile()">Download private file</button>
+      <a *ngIf="manualUrlDownload.length>0" [href]="manualUrlDownload">Download file</a>
     </div>
   </div>
 
@@ -24,13 +34,15 @@
 
 
   <ul class="list-group">
-    <li class="list-group-item" *ngFor="let file of visibleFiles$ | async">
+    <li class="list-group-item" *ngFor="let file of visibleFiles">
       <div class="row">
-        <div class="col-md-6"><h6 [ngStyle]="getFileStyle(file)">{{file.path}}/{{file.name}}</h6></div>
+        <div class="col-md-1">{{file.fileId}}</div>
+        <div class="col-md-5"><h6 [ngStyle]="getFileStyle(file)">{{file.path}}/{{file.name}}</h6></div>
         <div class="col-md-2">{{file.ownerUserId}}</div>
         <div class="col-md-4 text-right">
-          <button class="btn btn-success" (click)="onDownloadFile(file)">Download</button>
-          <button class="btn btn-danger" (click)="onDeleteFile(file)">Delete</button>
+          <a *ngIf="!file.deletionDate" [href]="file.downloadURL">Download</a>
+          <!--<button class="btn btn-success" (click)="onDownloadFile(file)">Download</button>-->
+          <button [disabled]="file.deletionDate" class="btn btn-danger" (click)="onDeleteFile(file)">{{file.deletionDate ? 'Deleted' : 'Delete'}}</button>
           <button [disabled]="file.ownerUserId !== currentUser.id" class="btn btn-info"
                   (click)="onClickTogglePublic(file)">{{file.isPublic ? 'Public' : 'Private'}}
           </button>

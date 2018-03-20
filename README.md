@@ -1,27 +1,26 @@
-# RapidStorageWeb
+# Home task for RapidAPI
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.7.3.
+By Ido Zilberberg
 
-## Development server
+## Instructions
+* Clone
+* Run `npm install`
+* Run `ng serve`
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Alternatively, browse to TBD
 
-## Code scaffolding
+## Design
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Scale considerations
+### Low volume
+For small scale, it is enough to have a single Node.js app that:
+* Serves the front-end code (Angular 5) as static files ("web app")
+* Accepts API calls from the front-end using Express.js ("server")
+* Connects to Heroku File Stack add-on for file storage
+* Connects to Google Firebase to store file metadata
+* Deploys on a single Heroku dyno
 
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+### High volume
+* Separate the web app and server components so higher traffic on one of them does not affect performance of the other, and so they can scale and be maintained separately.
+* Replace Heroku File Stack with Amazon S3 of other infinitely scalable storage solution
+* Replace Google Firebase with a scalable DB solution (e.g. relational: [Amazon RDS](https://aws.amazon.com/rds/); document-based: [mLab MongoDB](https://mlab.com/home))
