@@ -37,4 +37,4 @@ Note: this client sends requests to localhost on port 5000. The server is config
 * Handle server errors in a centralized manner - presently too many "catch" clauses in code
 * Error sometimes won't disappear and you'll need to refresh the page
 * Better error notifications to user
-
+* Unit tests with Mocha & Chai
