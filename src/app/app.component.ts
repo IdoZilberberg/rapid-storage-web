@@ -34,7 +34,11 @@ export class AppComponent implements OnInit {
     this.files.reloadVisibleFiles(this.currentUser)
       .then(files => {
         this.visibleFiles = files;
+      })
+      .catch(error => {
+        this.errMessage = error.message;
       });
+
   }
 
   // ngOnChanges(changes: SimpleChanges) {
@@ -50,7 +54,11 @@ export class AppComponent implements OnInit {
     this.files.reloadVisibleFiles(this.currentUser)
       .then(files => {
         this.visibleFiles = files;
+      })
+      .catch(error => {
+        this.errMessage = error.message;
       });
+
     console.log('changes: visibleFiles');
   }
 
@@ -62,7 +70,11 @@ export class AppComponent implements OnInit {
         this.files.reloadVisibleFiles(this.currentUser)
           .then(files => {
             this.visibleFiles = files;
+          })
+          .catch(error => {
+            this.errMessage = error.message;
           });
+
       });
   }
 
@@ -76,6 +88,9 @@ export class AppComponent implements OnInit {
         this.files.reloadVisibleFiles(this.currentUser)
           .then(files => {
             this.visibleFiles = files;
+          })
+          .catch(error => {
+            this.errMessage = error.message;
           });
 
       });
@@ -146,7 +161,11 @@ export class AppComponent implements OnInit {
         this.files.reloadVisibleFiles(this.currentUser)
           .then(files => {
             this.visibleFiles = files;
+          })
+          .catch(error => {
+            this.errMessage = error.message;
           });
+
 
       });
     // fData.append('data', JSON.stringify(newFileMetadata));
@@ -177,7 +196,11 @@ export class AppComponent implements OnInit {
         this.files.reloadVisibleFiles(this.currentUser)
           .then(files => {
             this.visibleFiles = files;
+          })
+          .catch(error => {
+            this.errMessage = error.message;
           });
+
 
       });
   }
